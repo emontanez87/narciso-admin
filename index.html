@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="light-content">
+  <title>narciso · admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --blue:   #415b98;
+      --cream:  #f6f4f1;
+      --ink:    #111111;
+      --muted:  #6b6b6b;
+      --border: #e2dfd9;
+      --green:  #3a7d5a;
+      --red:    #c0392b;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      min-height: 100vh;
+      max-width: 430px;
+      margin: 0 auto;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--blue);
+      padding: 52px 24px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    header::after {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 200px; height: 200px;
+      border: 40px solid rgba(255,255,255,0.06);
+      border-radius: 50%;
+    }
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      color: white;
+      font-weight: 400;
+      letter-spacing: 1px;
+    }
+    header p {
+      font-size: 12px;
+      color: rgba(255,255,255,0.6);
+      margin-top: 4px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .header-pin {
+      margin-top: 16px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .header-pin input {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: white;
+      font-size: 14px;
+      width: 110px;
+      letter-spacing: 4px;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .header-pin input::placeholder { color: rgba(255,255,255,0.4); letter-spacing: 2px; }
+    .header-pin input:focus { outline: none; border-color: rgba(255,255,255,0.5); }
+    .pin-btn {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 8px;
+      padding: 8px 14px;
+      color: white;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .locked-msg {
+      font-size: 12px;
+      color: rgba(255,255,255,0.5);
+      margin-top: 8px;
+    }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex;
+      background: white;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .tab {
+      flex: 1;
+      padding: 14px 0;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .tab.active {
+      color: var(--blue);
+      border-bottom-color: var(--blue);
+    }
+
+    /* ── SECTIONS ── */
+    .section { display: none; padding: 20px; }
+    .section.active { display: block; }
+
+    /* ── CARDS ── */
+    .card {
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 14px;
+      border: 1px solid var(--border);
+    }
+    .card-label {
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    /* ── SCAN SECTION ── */
+    .scan-box {
+      background: white;
+      border-radius: 14px;
+      border: 2px dashed var(--border);
+      padding: 32px 20px;
+      text-align: center;
+      margin-bottom: 14px;
+    }
+    .scan-icon { font-size: 40px; margin-bottom: 12px; }
+    .scan-box h3 { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 400; margin-bottom: 6px; }
+    .scan-box p { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .input-row input {
+      flex: 1;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--ink);
+      background: white;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .input-row input:focus { outline: none; border-color: var(--blue); }
+
+    /* ── BUTTONS ── */
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      border: none;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      transition: all 0.15s;
+      letter-spacing: 0.5px;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: var(--blue); color: white; }
+    .btn-primary:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
+    .btn-stamp { background: var(--ink); color: white; font-size: 15px; padding: 16px; }
+    .btn-redeem { background: var(--green); color: white; }
+    .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--ink); }
+    .btn-danger { background: transparent; border: 1.5px solid #e8d5d3; color: var(--red); font-size: 13px; }
+
+    /* ── CUSTOMER CARD FOUND ── */
+    .customer-found {
+      display: none;
+      animation: slideUp 0.3s ease;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .customer-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 400;
+      margin-bottom: 4px;
+    }
+    .stamps-visual {
+      font-size: 22px;
+      letter-spacing: 4px;
+      margin: 14px 0 6px;
+      color: var(--blue);
+    }
+    .stamps-count {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .stamp-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+
+    /* ── REWARD BANNER ── */
+    .reward-banner {
+      background: linear-gradient(135deg, #2d5a3d, #3a7d5a);
+      color: white;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 14px;
+      display: none;
+    }
+    .reward-banner h3 { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 400; margin-bottom: 4px; }
+    .reward-banner p { font-size: 13px; opacity: 0.85; }
+
+    /* ── NEW CLIENT FORM ── */
+    .form-field { margin-bottom: 14px; }
+    .form-field label {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .form-field input {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 15px;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--ink);
+      background: white;
+    }
+    .form-field input:focus { outline: none; border-color: var(--blue); }
+
+    /* ── CLIENT LIST ── */
+    .client-item {
+      display: flex;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+      gap: 14px;
+      cursor: pointer;
+    }
+    .client-item:last-child { border-bottom: none; }
+    .client-avatar {
+      width: 40px; height: 40px;
+      background: var(--blue);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: white;
+      font-family: 'Playfair Display', serif;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .client-info { flex: 1; }
+    .client-info strong { font-size: 15px; font-weight: 500; display: block; }
+    .client-info span { font-size: 12px; color: var(--muted); }
+    .client-stamps {
+      font-size: 13px;
+      color: var(--blue);
+      font-weight: 500;
+      letter-spacing: 1px;
+    }
+
+    /* ── STATS ── */
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+    .stat-number {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      font-weight: 400;
+      color: var(--blue);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 32px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--ink);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 500;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 100;
+      white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast.green { background: var(--green); }
+
+    /* ── EMPTY STATE ── */
+    .empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+    }
+    .empty-icon { font-size: 36px; margin-bottom: 12px; }
+    .empty h3 { font-family: 'Playfair Display', serif; font-weight: 400; font-size: 18px; margin-bottom: 6px; color: var(--ink); }
+    .empty p { font-size: 13px; line-height: 1.6; }
+
+    /* ── CONFIRM OVERLAY ── */
+    .overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 50;
+      align-items: flex-end;
+    }
+    .overlay.show { display: flex; }
+    .overlay-sheet {
+      background: white;
+      border-radius: 20px 20px 0 0;
+      padding: 28px 24px 40px;
+      width: 100%;
+      animation: sheetUp 0.3s ease;
+    }
+    @keyframes sheetUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    .overlay-sheet h3 { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; margin-bottom: 8px; }
+    .overlay-sheet p { font-size: 14px; color: var(--muted); margin-bottom: 24px; line-height: 1.5; }
+    .overlay-actions { display: flex; flex-direction: column; gap: 10px; }
+
+    /* ── PIN LOCK ── */
+    .pin-locked { display: none; }
+    .unlocked .pin-locked { display: block; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>narciso</h1>
+  <p>coffee & daytime kitchen · admin</p>
+  <div class="header-pin" id="pinArea">
+    <input type="password" id="pinInput" placeholder="PIN" maxlength="4" inputmode="numeric">
+    <button class="pin-btn" onclick="checkPin()">Entrar</button>
+  </div>
+  <p class="locked-msg" id="lockedMsg">Ingresa el PIN para acceder</p>
+</header>
+
+<div id="appContent" style="display:none">
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('sellar')">Sellar</div>
+    <div class="tab" onclick="switchTab('nuevo')">+ Cliente</div>
+    <div class="tab" onclick="switchTab('clientes')">Clientes</div>
+    <div class="tab" onclick="switchTab('stats')">Stats</div>
+  </div>
+
+  <!-- ── TAB: SELLAR ── -->
+  <div class="section active" id="tab-sellar">
+
+    <div class="reward-banner" id="rewardBanner">
+      <h3>🎉 ¡Café gratis!</h3>
+      <p>Este cliente completó sus 8 sellos. Canjea su recompensa y la tarjeta se reinicia.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Buscar por ID de tarjeta</div>
+      <div class="input-row">
+        <input type="text" id="searchId" placeholder="NARCISO-001" oninput="this.value=this.value.toUpperCase()" onkeyup="if(event.key==='Enter') buscarCliente()">
+        <button class="btn btn-primary" style="width:auto;padding:12px 16px" onclick="buscarCliente()">Buscar</button>
+      </div>
+      <p style="font-size:12px;color:var(--muted)">El ID está en el QR de la tarjeta del cliente</p>
+    </div>
+
+    <div class="customer-found" id="customerFound">
+      <div class="card">
+        <div class="card-label">Cliente encontrado</div>
+        <div class="customer-name" id="foundName">—</div>
+        <div id="foundEmail" style="font-size:13px;color:var(--muted);margin-bottom:4px"></div>
+
+        <div class="stamps-visual" id="foundStamps">○ ○ ○ ○ ○ ○ ○ ○</div>
+        <div class="stamps-count" id="foundCount">0 / 8 sellos</div>
+
+        <div class="stamp-actions">
+          <button class="btn btn-stamp" id="btnSellar" onclick="confirmarSello()">
+            ✦ &nbsp; Agregar sello
+          </button>
+          <button class="btn btn-redeem" id="btnCanjear" style="display:none" onclick="confirmarCanje()">
+            🎁 &nbsp; Canjear café gratis
+          </button>
+          <button class="btn btn-outline" onclick="cerrarCliente()">Cancelar</button>
+        </div>
+      </div>
+
+      <div class="card" style="padding:16px 20px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">ID Tarjeta</div>
+            <div style="font-size:14px;font-weight:500;letter-spacing:1px" id="foundId">—</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">Desde</div>
+            <div style="font-size:13px" id="foundDate">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="notFound" style="display:none">
+      <div class="empty">
+        <div class="empty-icon">🔍</div>
+        <h3>No encontrado</h3>
+        <p>Verifica el ID de la tarjeta<br>o registra al cliente como nuevo</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB: NUEVO CLIENTE ── -->
+  <div class="section" id="tab-nuevo">
+    <div class="card">
+      <div class="card-label">Registrar nuevo cliente</div>
+      <div class="form-field">
+        <label>Nombre completo *</label>
+        <input type="text" id="newName" placeholder="María García" autocomplete="off">
+      </div>
+      <div class="form-field">
+        <label>Teléfono (para WhatsApp)</label>
+        <input type="tel" id="newPhone" placeholder="+52 444 123 4567" inputmode="tel">
+      </div>
+      <div class="form-field">
+        <label>Email (opcional)</label>
+        <input type="email" id="newEmail" placeholder="maria@email.com" inputmode="email">
+      </div>
+      <div style="background:#f0f4ff;border-radius:10px;padding:14px;margin-bottom:16px">
+        <div style="font-size:12px;color:var(--blue);font-weight:500;margin-bottom:4px">✦ ✦ Bienvenida</div>
+        <div style="font-size:13px;color:var(--muted)">La tarjeta se crea con 2 sellos de regalo automáticamente</div>
+      </div>
+      <button class="btn btn-primary" onclick="crearCliente()">Crear tarjeta</button>
+    </div>
+  </div>
+
+  <!-- ── TAB: CLIENTES ── -->
+  <div class="section" id="tab-clientes">
+    <div style="margin-bottom:14px">
+      <input type="text" id="searchClients" placeholder="Buscar cliente..." oninput="filtrarClientes(this.value)"
+        style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:14px;font-family:'DM Sans',sans-serif;background:white">
+    </div>
+    <div class="card" style="padding:0 20px">
+      <div id="clientList"></div>
+    </div>
+  </div>
+
+  <!-- ── TAB: STATS ── -->
+  <div class="section" id="tab-stats">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number" id="statTotal">0</div>
+        <div class="stat-label">Clientes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="statStamps">0</div>
+        <div class="stat-label">Sellos dados</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="statRedeemed">0</div>
+        <div class="stat-label">Cafés gratis</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="statReady">0</div>
+        <div class="stat-label">Listos para canjear</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">Últimos movimientos</div>
+      <div id="activityLog">
+        <div class="empty" style="padding:20px 0">
+          <div class="empty-icon">📋</div>
+          <p>Sin actividad aún</p>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-danger" style="margin-top:8px" onclick="exportarDatos()">Exportar datos (JSON)</button>
+  </div>
+
+</div><!-- /appContent -->
+
+<!-- ── CONFIRM OVERLAY ── -->
+<div class="overlay" id="confirmOverlay" onclick="cerrarOverlay(event)">
+  <div class="overlay-sheet">
+    <h3 id="overlayTitle">Confirmar</h3>
+    <p id="overlayMsg">¿Estás seguro?</p>
+    <div class="overlay-actions">
+      <button class="btn btn-stamp" id="overlayConfirmBtn">Confirmar</button>
+      <button class="btn btn-outline" onclick="cerrarOverlay()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════
+//  CONFIGURACIÓN
+// ══════════════════════════════════════════════
+const PIN = "1234"; // ← CAMBIA ESTE PIN
+const TOTAL_STAMPS = 8;
+const WELCOME_STAMPS = 2;
+
+// ══════════════════════════════════════════════
+//  ESTADO (localStorage para persistencia)
+// ══════════════════════════════════════════════
+function getDB() {
+  const raw = localStorage.getItem('narciso_db');
+  return raw ? JSON.parse(raw) : { clients: {}, activity: [] };
+}
+function saveDB(db) {
+  localStorage.setItem('narciso_db', JSON.stringify(db));
+}
+
+let currentClient = null;
+
+// ══════════════════════════════════════════════
+//  PIN
+// ══════════════════════════════════════════════
+function checkPin() {
+  const input = document.getElementById('pinInput').value;
+  if (input === PIN) {
+    document.getElementById('pinArea').style.display = 'none';
+    document.getElementById('lockedMsg').style.display = 'none';
+    document.getElementById('appContent').style.display = 'block';
+    refreshAll();
+    toast('Bienvenido ✦', 'green');
+  } else {
+    document.getElementById('pinInput').value = '';
+    document.getElementById('lockedMsg').textContent = 'PIN incorrecto';
+    document.getElementById('lockedMsg').style.color = '#ffaaaa';
+    document.getElementById('pinInput').focus();
+  }
+}
+document.getElementById('pinInput').addEventListener('keyup', e => {
+  if (e.key === 'Enter') checkPin();
+});
+
+// ══════════════════════════════════════════════
+//  TABS
+// ══════════════════════════════════════════════
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    const names = ['sellar','nuevo','clientes','stats'];
+    t.classList.toggle('active', names[i] === name);
+  });
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'clientes') renderClients();
+  if (name === 'stats') renderStats();
+}
+
+// ══════════════════════════════════════════════
+//  SELLOS VISUAL
+// ══════════════════════════════════════════════
+function renderStampsVisual(count) {
+  return Array.from({length: TOTAL_STAMPS}, (_,i) => i < count ? '✦' : '○').join(' ');
+}
+
+// ══════════════════════════════════════════════
+//  BUSCAR CLIENTE
+// ══════════════════════════════════════════════
+function buscarCliente() {
+  const id = document.getElementById('searchId').value.trim().toUpperCase();
+  if (!id) return;
+  const db = getDB();
+  const client = db.clients[id];
+  document.getElementById('notFound').style.display = 'none';
+  document.getElementById('customerFound').style.display = 'none';
+  document.getElementById('rewardBanner').style.display = 'none';
+
+  if (!client) {
+    document.getElementById('notFound').style.display = 'block';
+    return;
+  }
+  currentClient = { id, ...client };
+  mostrarCliente(currentClient);
+}
+
+function mostrarCliente(c) {
+  document.getElementById('foundName').textContent = c.name;
+  document.getElementById('foundEmail').textContent = c.phone || c.email || '';
+  document.getElementById('foundStamps').textContent = renderStampsVisual(c.stamps);
+  document.getElementById('foundCount').textContent = `${c.stamps} / ${TOTAL_STAMPS} sellos`;
+  document.getElementById('foundId').textContent = c.id;
+  document.getElementById('foundDate').textContent = new Date(c.createdAt).toLocaleDateString('es-MX', {day:'numeric',month:'short',year:'numeric'});
+
+  const listo = c.stamps >= TOTAL_STAMPS;
+  document.getElementById('rewardBanner').style.display = listo ? 'block' : 'none';
+  document.getElementById('btnCanjear').style.display = listo ? 'block' : 'none';
+  document.getElementById('btnSellar').style.display = listo ? 'none' : 'block';
+  document.getElementById('customerFound').style.display = 'block';
+}
+
+function cerrarCliente() {
+  currentClient = null;
+  document.getElementById('customerFound').style.display = 'none';
+  document.getElementById('notFound').style.display = 'none';
+  document.getElementById('searchId').value = '';
+  document.getElementById('rewardBanner').style.display = 'none';
+}
+
+// ══════════════════════════════════════════════
+//  SELLAR
+// ══════════════════════════════════════════════
+function confirmarSello() {
+  if (!currentClient) return;
+  showOverlay(
+    `Agregar sello a ${currentClient.name}`,
+    `Pasará de ${currentClient.stamps} a ${currentClient.stamps + 1} sellos.\n\n¿Confirmas la compra?`,
+    ejecutarSello,
+    '✦ Confirmar sello'
+  );
+}
+
+function ejecutarSello() {
+  const db = getDB();
+  db.clients[currentClient.id].stamps += 1;
+  const newStamps = db.clients[currentClient.id].stamps;
+
+  db.activity.unshift({
+    type: 'stamp',
+    clientId: currentClient.id,
+    clientName: currentClient.name,
+    stamps: newStamps,
+    date: new Date().toISOString()
+  });
+  if (db.activity.length > 50) db.activity.pop();
+  saveDB(db);
+
+  currentClient.stamps = newStamps;
+  mostrarCliente(currentClient);
+  cerrarOverlay();
+  toast(`✦ Sello agregado — ${newStamps}/${TOTAL_STAMPS}`, 'green');
+}
+
+// ══════════════════════════════════════════════
+//  CANJEAR
+// ══════════════════════════════════════════════
+function confirmarCanje() {
+  if (!currentClient) return;
+  showOverlay(
+    `🎉 Canjear café gratis`,
+    `${currentClient.name} completó sus ${TOTAL_STAMPS} sellos.\n\nAl canjear, la tarjeta se reinicia con ${WELCOME_STAMPS} sellos de bienvenida.`,
+    ejecutarCanje,
+    '🎁 Canjear y reiniciar'
+  );
+}
+
+function ejecutarCanje() {
+  const db = getDB();
+  db.clients[currentClient.id].stamps = WELCOME_STAMPS;
+  db.clients[currentClient.id].redeemed = (db.clients[currentClient.id].redeemed || 0) + 1;
+
+  db.activity.unshift({
+    type: 'redeem',
+    clientId: currentClient.id,
+    clientName: currentClient.name,
+    date: new Date().toISOString()
+  });
+  if (db.activity.length > 50) db.activity.pop();
+  saveDB(db);
+
+  currentClient.stamps = WELCOME_STAMPS;
+  mostrarCliente(currentClient);
+  cerrarOverlay();
+  toast('🎁 ¡Café canjeado! Tarjeta reiniciada', 'green');
+}
+
+// ══════════════════════════════════════════════
+//  CREAR CLIENTE
+// ══════════════════════════════════════════════
+function crearCliente() {
+  const name = document.getElementById('newName').value.trim();
+  const phone = document.getElementById('newPhone').value.trim();
+  const email = document.getElementById('newEmail').value.trim();
+
+  if (!name) { toast('Ingresa el nombre del cliente'); return; }
+
+  const db = getDB();
+  const count = Object.keys(db.clients).length + 1;
+  const id = 'NARCISO-' + String(count).padStart(3, '0');
+
+  db.clients[id] = {
+    name, phone, email,
+    stamps: WELCOME_STAMPS,
+    redeemed: 0,
+    createdAt: new Date().toISOString()
+  };
+
+  db.activity.unshift({
+    type: 'new',
+    clientId: id,
+    clientName: name,
+    date: new Date().toISOString()
+  });
+  saveDB(db);
+
+  document.getElementById('newName').value = '';
+  document.getElementById('newPhone').value = '';
+  document.getElementById('newEmail').value = '';
+
+  toast(`✦ ${name} registrado — ID: ${id}`, 'green');
+  switchTab('sellar');
+  document.getElementById('searchId').value = id;
+  buscarCliente();
+}
+
+// ══════════════════════════════════════════════
+//  RENDER CLIENTES
+// ══════════════════════════════════════════════
+function renderClients(filter = '') {
+  const db = getDB();
+  const list = document.getElementById('clientList');
+  const clients = Object.entries(db.clients)
+    .filter(([id, c]) => !filter || c.name.toLowerCase().includes(filter.toLowerCase()) || id.includes(filter.toUpperCase()))
+    .sort((a, b) => new Date(b[1].createdAt) - new Date(a[1].createdAt));
+
+  if (!clients.length) {
+    list.innerHTML = `<div class="empty" style="padding:20px 0"><div class="empty-icon">👥</div><p>Sin clientes aún</p></div>`;
+    return;
+  }
+
+  list.innerHTML = clients.map(([id, c]) => `
+    <div class="client-item" onclick="irACliente('${id}')">
+      <div class="client-avatar">${c.name[0].toUpperCase()}</div>
+      <div class="client-info">
+        <strong>${c.name}</strong>
+        <span>${id}${c.phone ? ' · ' + c.phone : ''}</span>
+      </div>
+      <div class="client-stamps">${c.stamps >= TOTAL_STAMPS ? '🎁' : c.stamps + '/' + TOTAL_STAMPS}</div>
+    </div>
+  `).join('');
+}
+
+function filtrarClientes(val) { renderClients(val); }
+
+function irACliente(id) {
+  document.getElementById('searchId').value = id;
+  switchTab('sellar');
+  buscarCliente();
+}
+
+// ══════════════════════════════════════════════
+//  STATS
+// ══════════════════════════════════════════════
+function renderStats() {
+  const db = getDB();
+  const clients = Object.values(db.clients);
+  const totalStamps = clients.reduce((a, c) => a + c.stamps, 0);
+  const totalRedeemed = clients.reduce((a, c) => a + (c.redeemed || 0), 0);
+  const readyToRedeem = clients.filter(c => c.stamps >= TOTAL_STAMPS).length;
+
+  document.getElementById('statTotal').textContent = clients.length;
+  document.getElementById('statStamps').textContent = totalStamps;
+  document.getElementById('statRedeemed').textContent = totalRedeemed;
+  document.getElementById('statReady').textContent = readyToRedeem;
+
+  const log = document.getElementById('activityLog');
+  if (!db.activity.length) return;
+
+  const icons = { stamp: '✦', redeem: '🎁', new: '👤' };
+  const labels = { stamp: 'Sello agregado', redeem: 'Café canjeado', new: 'Cliente nuevo' };
+
+  log.innerHTML = db.activity.slice(0, 20).map(a => `
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)">
+      <div style="font-size:20px;width:32px;text-align:center">${icons[a.type]}</div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:500">${a.clientName}</div>
+        <div style="font-size:12px;color:var(--muted)">${labels[a.type]}${a.stamps ? ' · ' + a.stamps + '/' + TOTAL_STAMPS : ''}</div>
+      </div>
+      <div style="font-size:11px;color:var(--muted)">${new Date(a.date).toLocaleDateString('es-MX',{day:'numeric',month:'short'})}</div>
+    </div>
+  `).join('');
+}
+
+function exportarDatos() {
+  const db = getDB();
+  const blob = new Blob([JSON.stringify(db, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `narciso-datos-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+}
+
+// ══════════════════════════════════════════════
+//  OVERLAY
+// ══════════════════════════════════════════════
+let overlayAction = null;
+function showOverlay(title, msg, action, btnLabel) {
+  overlayAction = action;
+  document.getElementById('overlayTitle').textContent = title;
+  document.getElementById('overlayMsg').textContent = msg;
+  document.getElementById('overlayConfirmBtn').textContent = btnLabel;
+  document.getElementById('overlayConfirmBtn').onclick = () => { action(); };
+  document.getElementById('confirmOverlay').classList.add('show');
+}
+function cerrarOverlay(e) {
+  if (e && e.target !== document.getElementById('confirmOverlay')) return;
+  document.getElementById('confirmOverlay').classList.remove('show');
+}
+
+// ══════════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════════
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast' + (type === 'green' ? ' green' : '');
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+function refreshAll() {
+  renderClients();
+  renderStats();
+}
+</script>
+</body>
+</html>
