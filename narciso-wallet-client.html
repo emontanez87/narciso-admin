@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>narciso · tu tarjeta</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --blue: #1c2a4a;
+      --accent: #415b98;
+      --cream: #f6f4f1;
+      --muted: #6b6b6b;
+      --border: #e2dfd9;
+      --green: #3a7d5a;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--blue);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      background: var(--cream);
+      border-radius: 24px;
+      padding: 36px 28px;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.4);
+    }
+    .logo-area {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .logo-area h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      font-weight: 400;
+      color: var(--blue);
+      letter-spacing: 2px;
+    }
+    .logo-area p {
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 24px 0;
+    }
+    .field { margin-bottom: 20px; }
+    .field label {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .field input {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-size: 16px;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--blue);
+      background: white;
+      transition: border-color 0.2s;
+    }
+    .field input:focus { outline: none; border-color: var(--accent); }
+    .field input.error { border-color: #c0392b; }
+    .btn {
+      width: 100%;
+      background: var(--blue);
+      color: var(--cream);
+      border: none;
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 15px;
+      font-weight: 500;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.5px;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
+    .note {
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 16px;
+      line-height: 1.6;
+    }
+    /* Estados */
+    .state { display: none; }
+    .state.active { display: block; }
+    /* Loading */
+    .loader {
+      text-align: center;
+      padding: 20px 0;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      margin: 0 auto 16px;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loader p { font-size: 14px; color: var(--muted); }
+    /* Success */
+    .success-icon { font-size: 52px; text-align: center; margin-bottom: 16px; }
+    .success h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 400;
+      color: var(--blue);
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .success p {
+      font-size: 14px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .wallet-btn {
+      width: 100%;
+      background: #000;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 15px;
+      font-weight: 500;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .error-msg {
+      background: #fff0ef;
+      border: 1px solid #f5c6c2;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 13px;
+      color: #c0392b;
+      margin-bottom: 16px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+
+  <div class="logo-area">
+    <h1>narciso</h1>
+    <p>coffee &amp; daytime kitchen</p>
+  </div>
+
+  <!-- ── FORM ── -->
+  <div class="state active" id="stateForm">
+    <div class="error-msg" id="errorMsg"></div>
+    <div class="field">
+      <label>Tu nombre</label>
+      <input type="text" id="inputName" placeholder="María García" autocapitalize="words" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Tu ID de tarjeta</label>
+      <input type="text" id="inputId" placeholder="NARCISO-001" autocomplete="off"
+        oninput="this.value=this.value.toUpperCase()">
+    </div>
+    <div class="divider"></div>
+    <button class="btn" onclick="generatePass()">Obtener mi tarjeta de lealtad</button>
+    <p class="note">Tu tarjeta se descarga directo a Apple Wallet 🍎</p>
+  </div>
+
+  <!-- ── LOADING ── -->
+  <div class="state" id="stateLoading">
+    <div class="loader">
+      <div class="spinner"></div>
+      <p>Generando tu tarjeta…</p>
+    </div>
+  </div>
+
+  <!-- ── SUCCESS ── -->
+  <div class="state" id="stateSuccess">
+    <div class="success">
+      <div class="success-icon">🎉</div>
+      <h2 id="successName">¡Listo!</h2>
+      <p>Tu tarjeta de lealtad está lista.<br>Tócala para agregarla a Wallet.</p>
+      <button class="wallet-btn" id="walletBtn">
+        🍎 &nbsp; Añadir a Apple Wallet
+      </button>
+      <p class="note" style="margin-top:16px">Muestra el QR de tu tarjeta en cada visita para acumular sellos ☕</p>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/forge/1.3.1/forge.min.js"></script>
+<script>
+// ── Datos embebidos ──────────────────────────
+const CERT_PEM  = `-----BEGIN CERTIFICATE-----
+MIIGIDCCBQigAwIBAgIQQxmOMB73KRCcmrSYXgw2ZjANBgkqhkiG9w0BAQsFADB1
+MUQwQgYDVQQDDDtBcHBsZSBXb3JsZHdpZGUgRGV2ZWxvcGVyIFJlbGF0aW9ucyBD
+ZXJ0aWZpY2F0aW9uIEF1dGhvcml0eTELMAkGA1UECwwCRzQxEzARBgNVBAoMCkFw
+cGxlIEluYy4xCzAJBgNVBAYTAlVTMB4XDTI2MDIwOTIxMzgyNloXDTI3MDMxMTIx
+MzgyNVowgZgxKDAmBgoJkiaJk/IsZAEBDBhwYXNzLmNvbS5uYXJjaXNvLmxveWFs
+dHkxLzAtBgNVBAMMJlBhc3MgVHlwZSBJRDogcGFzcy5jb20ubmFyY2lzby5sb3lh
+bHR5MRMwEQYDVQQLDApNWTVURlIyVDZIMRkwFwYDVQQKDBBFcm5lc3RvIE1vbnRh
+bmV6MQswCQYDVQQGEwJNWDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB
+AMNCjg6kg46cm1d6Pj+v1fGiCSP8jf8+KjEwvlyJObeOnPneaUjiAatnDmvo7Djy
+kamWEOCMmlGf5tU04nFdcvpKt7LbHeJr1yBgP1EgbMEUrG0jBtfv39J+C7RDU1+u
+tKVoYF2ATBryDSRsUnjGhvpyZiPBu9783JrrHJdxzrBgq4Oah5ww6mqmVnzgD31A
+Uh28vxrUsU/4AsjJxsA51vVI8cYhH2hB4URQOua9N10v5lsN/8Xfq29lKdK7lF59
+h4T5B7SKSdPiJGoW2DikfC88zcKUs0l0oUlEDdaxk04QbVz8jaJjl8/YhsEhVdUK
+Pnwl53L0Oi6fhtKoxfx7Gq0CAwEAAaOCAoYwggKCMAwGA1UdEwEB/wQCMAAwHwYD
+VR0jBBgwFoAUW9n6HeeaGgujmXYiUIY+kchbd6gwcAYIKwYBBQUHAQEEZDBiMC0G
+CCsGAQUFBzAChiFodHRwOi8vY2VydHMuYXBwbGUuY29tL3d3ZHJnNC5kZXIwMQYI
+KwYBBQUHMAGGJWh0dHA6Ly9vY3NwLmFwcGxlLmNvbS9vY3NwMDMtd3dkcmc0MDQw
+ggEeBgNVHSAEggEVMIIBETCCAQ0GCSqGSIb3Y2QFATCB/zCBwwYIKwYBBQUHAgIw
+gbYMgbNSZWxpYW5jZSBvbiB0aGlzIGNlcnRpZmljYXRlIGJ5IGFueSBwYXJ0eSBh
+c3N1bWVzIGFjY2VwdGFuY2Ugb2YgdGhlIHRoZW4gYXBwbGljYWJsZSBzdGFuZGFy
+ZCB0ZXJtcyBhbmQgY29uZGl0aW9ucyBvZiB1c2UsIGNlcnRpZmljYXRlIHBvbGlj
+eSBhbmQgY2VydGlmaWNhdGlvbiBwcmFjdGljZSBzdGF0ZW1lbnRzLjA3BggrBgEF
+BQcCARYraHR0cHM6Ly93d3cuYXBwbGUuY29tL2NlcnRpZmljYXRlYXV0aG9yaXR5
+LzAeBgNVHSUEFzAVBggrBgEFBQcDAgYJKoZIhvdjZAQOMDIGA1UdHwQrMCkwJ6Al
+oCOGIWh0dHA6Ly9jcmwuYXBwbGUuY29tL3d3ZHJnNC0xLmNybDAdBgNVHQ4EFgQU
+uqM+dkqfHvitnZX9d8nKPC85/1wwDgYDVR0PAQH/BAQDAgeAMCgGCiqGSIb3Y2QG
+ARAEGgwYcGFzcy5jb20ubmFyY2lzby5sb3lhbHR5MBAGCiqGSIb3Y2QGAwIEAgUA
+MA0GCSqGSIb3DQEBCwUAA4IBAQBW9Gf/D77S5if0MYlr0hclgvm3rL9kCd7inOsD
+0HK8LgfAUp3YsKSVVsvQrYzajwtP3gHoZWxEzqcJUGJWnXD0iIFCcS6AOAAsZLgd
+hmCEcoe3+ZDJeHgcYjVALKf6p4GJvzNvCwmy/R0iB0Sodp3Vm4Tsoz/q5bJcykb/
+RvsYyUcImrjkO5m4UoBxNDwLleQGeca6Jtl5OI2jjaA8yNGfKTHUnsI1wqL4fIgu
+ILIdexzHTWK9svRrnuYuvimEEAqYtZs/Wqi6qBB1zSTJkNDndUuLeLoYuRse1dnx
+2kcHiDm3DuOaIJl8YeY+5ew9AMpcC08cd+AvhUM+vLude0jT
+-----END CERTIFICATE-----`;
+const KEY_PEM   = `-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDDQo4OpIOOnJtX
+ej4/r9Xxogkj/I3/PioxML5ciTm3jpz53mlI4gGrZw5r6Ow48pGplhDgjJpRn+bV
+NOJxXXL6Srey2x3ia9cgYD9RIGzBFKxtIwbX79/Sfgu0Q1NfrrSlaGBdgEwa8g0k
+bFJ4xob6cmYjwbve/Nya6xyXcc6wYKuDmoecMOpqplZ84A99QFIdvL8a1LFP+ALI
+ycbAOdb1SPHGIR9oQeFEUDrmvTddL+ZbDf/F36tvZSnSu5RefYeE+Qe0iknT4iRq
+Ftg4pHwvPM3ClLNJdKFJRA3WsZNOEG1c/I2iY5fP2IbBIVXVCj58Jedy9Doun4bS
+qMX8exqtAgMBAAECggEAPLO2Igs28uDw0hMowvfRFRuAp/Vd15nl2AEFTRNEJDJr
+zqo8JPJN/pE9RILW3SVb71K90HElkHabdnDIbOHWWsVbsni4I6nO6TvCs1/XL3dT
+22HmQL9L385bqSC9DKPtePan7qlx/3Z8a3RZdz6Qu89QvZD+7OXDV038R4CT9vSq
+xEChhgZSNqTprfe34Wt9wO17ZrncOUy29a/bUfTJfpP1A+o2MaZDTN/2ns+Tq/JS
+qsggtjwbKeK8NW2KUIlBsivZoAfXjy7vMjMC42WxZiKvrrosmFrWXcrWMcKcB4Dc
+cQ6iJ3cIkA6Q5lVSPuld8wimyylFzlYw26wFEFyXwQKBgQD5exyuPVO4MjzUjdg0
+xemtjqbLY9cUML8QG2dPvpuA5gUtURY+tEBon1fTi89iVkb+D6MfusVlmqsiuppF
+p+1B2FTErmtQTNcCRNvGtldXqEPnRKrKMVAH29kcsa5mZQZlwWv2OsMTnk4nc8VQ
+qeZPI/dBw4kMM0c6TcULt/TDKQKBgQDIXLwzGg9T4ezomqbHYHjBM7KCGWJZJ9r7
+voNY8/8k41ggvIWpcaGp3CPcJmebO9vh31+SsD9FlGuLmmHlHZorpZX3IfJZT3mG
+ZnDO1XMNz9LBVPQYwmgDpPCowzIySWbcYo5qPqza2nnMrpwrg5pjI4b02OhXH+jB
+s8ves5Qv5QKBgD/z70Y7MlrlhfJ26hWdJmn3R4qb7WafmFroq3MlyXchf/I99xXb
+3ybysfDoxiDPPSOjno1js3Z4T6Z3b1Sr14YpjpFcpOXQzM0oGa62z20JFV8TmzR5
+r6pUETPp2GsnOpybGLHmHlvJGP/EDbC/3OosrhWNqnQWMQwhI4H9hiEBAoGAbu9Z
+jHm7TthiUY9/FBkIAwDar0nauD5m8sfS9ady9zuhCc8Xum+d8OxgNn5VExAbeH4y
+7ocDIUVCHnOGDFNNjykJVWHIS0bDpHSHtR1drKIKsNyWojbRXGMwlGAvJMSbXR58
+d7rn/ezFT1zGPxmIm6eKC3sleUfDmawxDscjHzkCgYEAreS73nQUPAQfmZR1cB5U
+24XuoSRXskY/8HSp2mX+N7ZiFrpQhHxtP5gLdClNFymYR1s+k1QqYyNTMGkKiIQd
+UGuH09u6Ls6ozpu4a+EG+IxRioMqO+PYehtoLtF3ionfuDg9QkuegKAWKDciWBBD
+6Hh/kYKs6ybl6Qs92ecoCV4=
+-----END PRIVATE KEY-----`;
+const WWDR_PEM  = `-----BEGIN CERTIFICATE-----
+MIIEVTCCAz2gAwIBAgIUE9x3lVJx5T3GMujM/+Uh88zFztIwDQYJKoZIhvcNAQEL
+BQAwYjELMAkGA1UEBhMCVVMxEzARBgNVBAoTCkFwcGxlIEluYy4xJjAkBgNVBAsT
+HUFwcGxlIENlcnRpZmljYXRpb24gQXV0aG9yaXR5MRYwFAYDVQQDEw1BcHBsZSBS
+b290IENBMB4XDTIwMTIxNjE5MzYwNFoXDTMwMTIxMDAwMDAwMFowdTFEMEIGA1UE
+Aww7QXBwbGUgV29ybGR3aWRlIERldmVsb3BlciBSZWxhdGlvbnMgQ2VydGlmaWNh
+dGlvbiBBdXRob3JpdHkxCzAJBgNVBAsMAkc0MRMwEQYDVQQKDApBcHBsZSBJbmMu
+MQswCQYDVQQGEwJVUzCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANAf
+eKp6JzKwRl/nF3bYoJ0OKY6tPTKlxGs3yeRBkWq3eXFdDDQEYHX3rkOPR8SGHgjo
+v9Y5Ui8eZ/xx8YJtPH4GUnadLLzVQ+mxtLxAOnhRXVGhJeG+bJGdayFZGEHVD41t
+QSo5SiHgkJ9OE0/QjJoyuNdqkh4laqQyziIZhQVg3AJK8lrrd3kCfcCXVGySjnYB
+5kaP5eYq+6KwrRitbTOFOCOL6oqW7Z+uZk+jDEAnbZXQYojZQykn/e2kv1MukBVl
+PNkuYmQzHWxq3Y4hqqRfFcYw7V/mjDaSlLfcOQIA+2SM1AyB8j/VNJeHdSbCb64D
+YyEMe9QbsWLFApy9/a8CAwEAAaOB7zCB7DASBgNVHRMBAf8ECDAGAQH/AgEAMB8G
+A1UdIwQYMBaAFCvQaUeUdgn+9GuNLkCm90dNfwheMEQGCCsGAQUFBwEBBDgwNjA0
+BggrBgEFBQcwAYYoaHR0cDovL29jc3AuYXBwbGUuY29tL29jc3AwMy1hcHBsZXJv
+b3RjYTAuBgNVHR8EJzAlMCOgIaAfhh1odHRwOi8vY3JsLmFwcGxlLmNvbS9yb290
+LmNybDAdBgNVHQ4EFgQUW9n6HeeaGgujmXYiUIY+kchbd6gwDgYDVR0PAQH/BAQD
+AgEGMBAGCiqGSIb3Y2QGAgEEAgUAMA0GCSqGSIb3DQEBCwUAA4IBAQA/Vj2e5bbD
+eeZFIGi9v3OLLBKeAuOugCKMBB7DUshwgKj7zqew1UJEggOCTwb8O0kU+9h0UoWv
+p50h5wESA5/NQFjQAde/MoMrU1goPO6cn1R2PWQnxn6NHThNLa6B5rmluJyJlPef
+x4elUWY0GzlxOSTjh2fvpbFoe4zuPfeutnvi0v/fYcZqdUmVIkSoBPyUuAsuORFJ
+EtHlgepZAE9bPFo22noicwkJac3AfOriJP6YRLj477JxPxpd1F1+M02cHSS+APCQ
+A1iZQT0xWmJArzmoUUOSqwSonMJNsUvSq3xKX+udO7xPiEAGE/+QF4oIRynoYpgp
+pU8RBWk6z/Kf
+-----END CERTIFICATE-----`;
+const IMAGES    = {"icon.png": "iVBORw0KGgoAAAANSUhEUgAAAB0AAAAdCAYAAABWk2cPAAAAY0lEQVR4nGOU0fL6z0BnwERvC0ctHbV01NKhYSkLOZpunVp+EsZWM4s0J1U/IynFILJl6IAUywd3nOLzJTHyZFlKTTC4LSWUUAZ9QiIpy8AAXfMptcDgTkijlo5aOmrpgFkKADooGnVU+l4SAAAAAElFTkSuQmCC", "icon@2x.png": "iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAYAAADhu0ooAAAAwUlEQVR4nO3YwQnCQBBGYSOW4dmDBZge7MAKrUVLsJl4XwLKzswqL+87ChIfP4ZNpuP5uuw2YP/rHzCKoTSG0hhKYyiNoTSG0hhKYyiNoTSHkRd7Pe+P9rPT5TaPuPY04uXYWmCrOrg09JvAVlVw2X+0JzLyvU82czMqCY2uUrGqi/bKWiN7VRelMZQmPTTrZJN9QnLRiOgaFeddF43qXaXq6cXn0Qr4Nwz/wJsRjaE0htIYSmMojaE0htIYSmMozRs0PjXL5ESbNwAAAABJRU5ErkJggg==", "logo.png": "iVBORw0KGgoAAAANSUhEUgAAAKAAAAAyCAYAAADbYdBlAAACoUlEQVR4nO2bzVEDMQyFNwxlcM6BAlIEHaTC9JIS0gwcmAWPR9aP14kk+30nCLbW2X08W5b39PH59b0B4MSb9wDA2kCAwBUIELgCAQJXIEDgCgQIXIEAgSvv3gNYjcf99vfz+XJ1HEkM4IDAFQjQCbjfLyeU4oAnaRywXDvtv9efSf0tfazXOxL7CNbvFY3QDljf1PPl2rzRrSnN0l5zvbIf99Dr+FRbTRvtWKX2UUnjgNvGZ5DUA6nba8WjaSP1tzqSZaxU27p9FkcM7YA7WuFRD01yjx6n4uJL2yzW8daf98aPSioHpGjd5NoVemNbxMeNZzTc997J4ILpBejFs4SWQTQjWaYSMurBauL0iLNMeEqHzeZoVqZ3QO8FueX61PpvRtGVTC1AKVvsgUoGtH1alEKjxihl+JmZVoARssEjIqGEmCGrtTKtAFuMcI7SBVvxuEz5VWQQbPgkxLLh+7jfzFWD8u+9D2xkgiONoU5WtNWUqITeiJbKTVLpittUHrGGk2JYynbW0tospbjQAhyBpiIy4oGNimVdu3K16gxML0AQm+WSEBALCBC4AgECV8Jvw0hQi3bpCJN08FQ6iNp7/T2uZQyajD4zqR1QOjavLWFxBz6pttLmsxSn51WCbdOfoM5EagHu1GUrruZLlbekkpemJGbZe5TGpnU2OOAi1Mekel5AqsVV/8OsyhQC3AUh1WhbTmaZgrkxcNeqRczFaMUaMc5opBZgOX0ecRbtqRMqNjf1j3A2LsYMzolKCHAl/TbMUXq3ZEYe61qZ1FPwaKipmNu26Z0eIbx/IEACy7pOe8x/9peLeoEAC54xrfacP1wJCJCA2vcr4bZ7pL5lf4AsGDgDBwSuQIDAFQgQuAIBAlcgQOAKBAhcgQCBKz/TDvK1JOJvpAAAAABJRU5ErkJggg==", "logo@2x.png": "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"};
+
+const PASS_TYPE = "pass.com.narciso.loyalty";
+const TEAM_ID   = "MY5TFR2T6H";
+
+function showState(id) {
+  document.querySelectorAll('.state').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.style.display = 'block';
+  showState('stateForm');
+}
+
+async function generatePass() {
+  const name = document.getElementById('inputName').value.trim();
+  const id   = document.getElementById('inputId').value.trim().toUpperCase();
+
+  if (!name) { document.getElementById('inputName').classList.add('error'); return; }
+  if (!id || !id.startsWith('NARCISO-')) { 
+    document.getElementById('inputId').classList.add('error');
+    showError('El ID debe tener el formato NARCISO-001'); 
+    return; 
+  }
+
+  document.getElementById('errorMsg').style.display = 'none';
+  showState('stateLoading');
+
+  try {
+    const passBlob = await buildPkpass(name, id);
+    const url = URL.createObjectURL(passBlob);
+    
+    document.getElementById('successName').textContent = `¡Listo, ${name.split(' ')[0]}!`;
+    document.getElementById('walletBtn').onclick = () => window.location.href = url;
+    showState('stateSuccess');
+
+    // En iOS Safari intenta descarga automática
+    window.location.href = url;
+
+  } catch(e) {
+    showError('Hubo un error generando tu tarjeta. Intenta de nuevo. (' + e.message + ')');
+    console.error(e);
+  }
+}
+
+async function buildPkpass(name, serialNumber) {
+  // ── 1. Crear pass.json ──
+  const passJson = {
+    formatVersion: 1,
+    passTypeIdentifier: PASS_TYPE,
+    teamIdentifier: TEAM_ID,
+    serialNumber: serialNumber,
+    organizationName: "Narciso",
+    description: "Tarjeta de lealtad Narciso",
+    logoText: "",
+    foregroundColor: "rgb(246, 244, 241)",
+    backgroundColor: "rgb(28, 42, 74)",
+    labelColor: "rgb(160, 175, 210)",
+    barcodes: [{ format: "PKBarcodeFormatQR", message: serialNumber, messageEncoding: "iso-8859-1" }],
+    storeCard: {
+      headerFields:    [{ key: "member_since", label: "MIEMBRO DESDE", value: "2026" }],
+      primaryFields:   [{ key: "name",   label: "CLIENTE",   value: name }],
+      secondaryFields: [
+        { key: "id",     label: "ID",         value: serialNumber },
+        { key: "status", label: "MEMBRESÍA",  value: "Activa" }
+      ],
+      backFields: [
+        { key: "program", label: "PROGRAMA DE LEALTAD", value: "Acumula 8 compras y recibe un café completamente gratis.\n\nTus primeros 2 sellos son regalo de bienvenida." },
+        { key: "terms",   label: "TÉRMINOS", value: "• Un sello por cada café comprado\n• No transferible ni canjeable por efectivo\n• Válida únicamente en Narciso Coffee & Daytime Kitchen" }
+      ]
+    }
+  };
+
+  // ── 2. Preparar archivos ──
+  const files = {};
+  files['pass.json'] = new TextEncoder().encode(JSON.stringify(passJson));
+  for (const [fname, b64] of Object.entries(IMAGES)) {
+    const bin = atob(b64);
+    const arr = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    files[fname] = arr;
+  }
+
+  // ── 3. Manifest (SHA1) ──
+  const manifest = {};
+  for (const [fname, data] of Object.entries(files)) {
+    const hashBuf = await crypto.subtle.digest('SHA-1', data);
+    manifest[fname] = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+  files['manifest.json'] = new TextEncoder().encode(JSON.stringify(manifest));
+
+  // ── 4. Firma PKCS#7 con forge ──
+  const cert  = forge.pki.certificateFromPem(CERT_PEM);
+  const key   = forge.pki.privateKeyFromPem(KEY_PEM);
+  const wwdr  = forge.pki.certificateFromPem(WWDR_PEM);
+
+  const p7 = forge.pkcs7.createSignedData();
+  p7.content = forge.util.createBuffer(new TextDecoder().decode(files['manifest.json']));
+  p7.addCertificate(cert);
+  p7.addCertificate(wwdr);
+  p7.addSigner({
+    key: key,
+    certificate: cert,
+    digestAlgorithm: forge.pki.oids.sha1,
+    authenticatedAttributes: []
+  });
+  p7.sign({ detached: true });
+  const derBytes = forge.asn1.toDer(p7.toAsn1()).getBytes();
+  const sigArr   = new Uint8Array(derBytes.length);
+  for (let i = 0; i < derBytes.length; i++) sigArr[i] = derBytes.charCodeAt(i);
+  files['signature'] = sigArr;
+
+  // ── 5. Empaquetar ZIP ──
+  const zip = new JSZip();
+  for (const [fname, data] of Object.entries(files)) {
+    zip.file(fname, data);
+  }
+  return await zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.apple.pkpass' });
+}
+
+// Limpiar error al escribir
+document.getElementById('inputName').addEventListener('input', function() { this.classList.remove('error'); });
+document.getElementById('inputId').addEventListener('input', function() { this.classList.remove('error'); });
+document.getElementById('inputId').addEventListener('keyup', e => { if (e.key === 'Enter') generatePass(); });
+</script>
+</body>
+</html>
